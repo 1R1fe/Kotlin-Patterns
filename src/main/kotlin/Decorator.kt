@@ -32,11 +32,11 @@ class NetworkCheck(private val api: Api) : Api{
 }
 
 fun main() {
-    val apiclient = ApiClient()
-    val logger = Logger(apiclient)
+    val apiClient = ApiClient()
+    val logger = Logger(apiClient)
     val networkCheck = NetworkCheck(logger)
 
-    val data = "Sasha lox"
+    val data = "Some important data to send"
 
     networkCheck.send(data)
 }
