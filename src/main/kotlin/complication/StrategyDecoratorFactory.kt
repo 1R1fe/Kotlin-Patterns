@@ -1,5 +1,4 @@
 package complication
-
 //Combining decorator, strategy and simple factory patterns together.
 
 //For example, delivery cost now depends on transport type and cargo category(dangerous, valuable, fragile)
@@ -29,35 +28,74 @@ class DeliveryMan : DeliveryMethod{
 
 class Insurance(val inner: DeliveryMethod):DeliveryMethod{
     override fun calculateCost(distance: Int):Double {
-        println("Add-on service: Insurance")
-
         return inner.calculateCost(distance) + 100.00
     }
 }
+
 class FastDelivery(val inner: DeliveryMethod) : DeliveryMethod{
     override fun calculateCost(distance: Int):Double {
-        println("Add-on service: fast delivery")
-
         return inner.calculateCost(distance) + 50.00
     }
+}
+
+class Fragile(val inner: DeliveryMethod):DeliveryMethod{
+    override fun calculateCost(distance: Int):Double {
+        return inner.calculateCost(distance) + 20.00
+    }
+}
+class Dangerous(val inner: DeliveryMethod):DeliveryMethod {
+    override fun calculateCost(distance: Int): Double {
+        return inner.calculateCost(distance) + 10.00
+    }
+}
+
+class Expensive(val inner: DeliveryMethod):DeliveryMethod{
+    override fun calculateCost(distance: Int):Double {
+        return inner.calculateCost(distance) + 15.00
+    }
+}
+
+enum class Transport{
+    Ship,
+    DeliveryMan,
+    Plane,
+    Truck
+}
+enum class Category{
+    Fragile,
+    Dangerous,
+    Expensive
 }
 
 object OrderFactory{
     fun create(
         fastDelivery: Boolean,
         insurance: Boolean,
-        transport: DeliveryMethod,
+        transport: Transport,
+        category: Category
         ) : DeliveryMethod {
-        var order = transport
 
+        var data: DeliveryMethod
+
+        data = when (transport){
+            Transport.Ship -> Ship()
+            Transport.DeliveryMan -> DeliveryMan()
+            Transport.Plane -> Plane()
+            Transport.Truck -> Truck()
+        }
         if (fastDelivery){
-            order = FastDelivery(order)
+            data = FastDelivery(data)
         }
         if (insurance){
-            order = Insurance(order)
+            data = Insurance(data)
+        }
+        data = when(category){
+            Category.Fragile -> Fragile(data)
+            Category.Dangerous -> Dangerous(data)
+            Category.Expensive -> Expensive(data)
         }
 
-        return order
+        return data
     }
 }
 
@@ -65,17 +103,19 @@ fun main(){
     var order = OrderFactory.create(
         fastDelivery = true,
         insurance = true,
-        transport = DeliveryMan(),
+        transport = Transport.Ship,
+        category = Category.Fragile,
     )
+
     println(order.calculateCost(1000))
 
     order = OrderFactory.create(
         fastDelivery = false,
         insurance = true,
-        transport = Ship(),
+        transport = Transport.DeliveryMan,
+        category = Category.Expensive
     )
-    println(order.calculateCost(1000))
-}
 
-//убрать логирование из декораторов.
-//добавить классы для категорий товаров.
+    println(order.calculateCost(1000))
+
+}
